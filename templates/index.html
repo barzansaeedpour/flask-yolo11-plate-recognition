@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO11 Plate Detection</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>YOLO11 Plate Detection</h1>
+        <form id="upload-form">
+            <label for="image-input">Upload an image of a plate:</label>
+            <input type="file" id="image-input" accept="image/*" required>
+            <button type="submit">Detect</button>
+        </form>
+        <div id="result">
+            <p id="detected_plate_txt"></p>
+            <img id="detected_chars_image" src="" alt="Detected Characters Image">
+            <img id="detected_plate_image" src="" alt="Detected Plate Image">
+        </div>
+    </div>
+    <script src="/static/app.js"></script>
+</body>
+</html>
