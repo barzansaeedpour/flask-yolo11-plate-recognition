@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YOLO11 Plate Detection</title>
+    <title>تشخیص پلاک ایرانی</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
-        <h1>YOLO11 Plate Detection</h1>
+        <h1>تشخیص پلاک ایرانی</h1>
         <form id="upload-form">
-            <label for="image-input">Upload an image of a plate:</label>
+            <label for="image-input">انتخاب تصویر حاوی پلاک:</label>
             <input type="file" id="image-input" accept="image/*" required>
-            <button type="submit">Detect</button>
+            <button type="submit">تشخیص</button>
         </form>
         
         <div id="result">
             <p id="detected_plate_txt"></p>
-            <img id="detected_chars_image" src="" alt="Detected Characters Image">
-            <img id="detected_plate_image" src="" alt="Detected Plate Image">
+            <img id="detected_chars_image" src="" alt="نتیجه تشخیص کاراکترها">
+            <img id="detected_plate_image" src="" alt="نتیجه تشخیص قالب پلاک ها">
         </div>
         
     </div>

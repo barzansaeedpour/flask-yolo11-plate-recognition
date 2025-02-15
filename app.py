@@ -36,20 +36,24 @@ def predict():
     cv2.imwrite('./frame.png', frame[:,:,[2,1,0]])
     detected_plate_txt, detected_chars_image, detected_plate_image = plate_detection(frame, model_plate_detection, model_character_detection, save_dir='', save=False)
 
-    # Save images to in-memory files to send back as response 
-    detected_chars_img_io = io.BytesIO() 
-    Image.fromarray(detected_chars_image).save(detected_chars_img_io, 'PNG') 
-    detected_chars_img_io.seek(0) 
-    detected_plate_img_io = io.BytesIO() 
-    Image.fromarray(detected_plate_image).save(detected_plate_img_io, 'PNG') 
-    detected_plate_img_io.seek(0)
+    if detected_plate_txt!='':
+        # Save images to in-memory files to send back as response 
+        detected_chars_img_io = io.BytesIO() 
+        Image.fromarray(detected_chars_image).save(detected_chars_img_io, 'PNG') 
+        detected_chars_img_io.seek(0) 
+        detected_plate_img_io = io.BytesIO() 
+        Image.fromarray(detected_plate_image).save(detected_plate_img_io, 'PNG') 
+        detected_plate_img_io.seek(0)
     
-    # Perform detection
-    # results = model(image)
-    # detections = results.pandas().xyxy[0].to_dict(orient='records')  # List of detection dictionaries
+        # Perform detection
+        # results = model(image)
+        # detections = results.pandas().xyxy[0].to_dict(orient='records')  # List of detection dictionaries
 
-    # return jsonify({'detections': "detected_plate_txt"})
-    return jsonify({ 'detected_plate_txt': detected_plate_txt, 'detected_chars_image': 'data:image/png;base64,' + base64.b64encode(detected_chars_img_io.getvalue()).decode(), 'detected_plate_image': 'data:image/png;base64,' + base64.b64encode(detected_plate_img_io.getvalue()).decode() })
-
+        # # return jsonify({'detections': "detected_plate_txt"})
+        # detected_plate_txt = detected_plate_txt[:-2] + ' ' + detected_plate_txt[-2:]
+        return jsonify({ 'detected_plate_txt': detected_plate_txt, 'detected_chars_image': 'data:image/png;base64,' + base64.b64encode(detected_chars_img_io.getvalue()).decode(), 'detected_plate_image': 'data:image/png;base64,' + base64.b64encode(detected_plate_img_io.getvalue()).decode() })
+    else:
+        return jsonify({ 'detected_plate_txt': 'عدم تشخیص', 'detected_chars_image': '', 'detected_plate_image': '' })
+        
 if __name__ == '__main__':
     app.run(debug=True)

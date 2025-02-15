@@ -106,7 +106,7 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
         ########################################### end Rotate image
         
         
-        results2 = model_character_detection.predict(source=extracted_plate_image, conf = 0.7, save=False, show = False, project=save_dir, name="", save_txt = False) 
+        results2 = model_character_detection.predict(source=extracted_plate_image, conf = 0.3, save=False, show = False, project=save_dir, name="", save_txt = False) 
         
     
         for r in results2:
