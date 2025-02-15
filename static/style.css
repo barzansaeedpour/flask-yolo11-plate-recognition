@@ -1,5 +1,14 @@
+@font-face {
+    font-family: 'MyCustomFont';
+    src: url('/static/fonts/Samim.woff2') format('woff2'),
+         url('/static/fonts/Samim.woff') format('woff'),
+         url('/static/fonts/Samim.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'MyCustomFont', Arial, sans-serif;
     background-color: #f9f9f9;
     margin: 0;
     padding: 0;
@@ -7,6 +16,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    direction: rtl;
 }
 
 .container {
@@ -41,7 +51,7 @@ button:hover {
     text-align: left;
 }
 img {
-    max-width: 600px;
+    max-width: 500px;
     height: auto;
     display: block;
     margin: 10px 0;

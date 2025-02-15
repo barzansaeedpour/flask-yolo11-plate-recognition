@@ -34,7 +34,7 @@ def predict():
     # frame = frame[:,:,[2,1,0]]
     frame = frame[:,:,[0,1,2]]
     cv2.imwrite('./frame.png', frame[:,:,[2,1,0]])
-    detected_plate_txt, detected_chars_image, detected_plate_image = plate_detection(frame, model_plate_detection, model_character_detection, save_dir='', save=False)
+    detected_plate_txt, detected_plate_image, detected_chars_image = plate_detection(frame, model_plate_detection, model_character_detection, save_dir='', save=False)
 
     if detected_plate_txt!='':
         # Save images to in-memory files to send back as response 

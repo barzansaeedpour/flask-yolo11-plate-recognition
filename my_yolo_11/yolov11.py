@@ -72,8 +72,46 @@ classNames2 = numbers + letters
 
 
 def plate_detection(frame, model_plate_detection, model_character_detection, save_dir,save = True):
-    img = frame
-    results = model_plate_detection.predict(source=img, conf = 0.3, save=False, show = False, project=save_dir, name="", save_txt = False) 
+    
+    results = model_plate_detection.predict(source=frame, conf = 0.3, save=False, show = False, project=save_dir, name="", save_txt = False) 
+    for r in results:
+        boxes = r.boxes
+    img = Image.fromarray(frame)
+    for box in boxes:
+        # bounding box
+        x1, y1, x2, y2 = box.xyxy[0]
+        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # convert to int values
+
+        # confidence
+        confidence = math.ceil((box.conf[0]*100))/100
+        # class name
+        cls = int(box.cls[0])
+        # object details
+        org = [x1, y1-20]
+        try:
+            img = Image.fromarray(img)
+        except:
+            pass
+        draw = ImageDraw.Draw(img)
+
+        text = classNames[cls]
+        
+        if confidence<0.80:
+            color = (0, 0, 255)  # Red color
+        else:
+            color = (255,100,100)
+        
+        font = ImageFont.truetype(f"{base_dir}/my_yolo_v8/fonts/arial.ttf", 80)    
+            
+        draw.rectangle([(x1, y1), (x2, y2)], outline =color,width=4)
+        # draw.rectangle([(org[0], org[1]), (org[0]+(len(text)*25), org[1]+25)], fill =color)
+        draw.rectangle([(org[0]-100, org[1]-100), (org[0]+465, org[1]+30)], fill =color,width=1)
+        draw.text((org[0]-100, org[1]-100), f"{persian(text)} -> %{round(confidence*100,2)}", font=font,fill=(255,255,255))
+        img = np.array(img)
+
+    frame_with_plate = np.array(img)
+    
+    
     for r in results:
             boxes = r.boxes
 
@@ -83,7 +121,7 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # convert to int values
 
         try:
-            extracted_plate_image = extract_the_plate(img=img, top_left=(x1, y1), bottom_right=(x2, y2))
+            extracted_plate_image = extract_the_plate(img=frame, top_left=(x1, y1), bottom_right=(x2, y2))
         except:
             continue
         new_name = get_new_name()
@@ -162,7 +200,7 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
             cv2.imwrite(save_dir + new_name +'-detected.png',img)
         time.sleep(0.1)
         
-        return detected_classes, frame, img
+        return detected_classes, frame_with_plate, img
         # cv2.imshow("Real-time Webcam", img)
         # time.sleep(0.1)
 
