@@ -32,12 +32,14 @@ def predict():
     file = request.files['image']
     image = Image.open(io.BytesIO(file.read()))
     frame = np.array(image)
-    # frame = frame[:,:,[2,1,0]]
-    frame = frame[:,:,[0,1,2]]
-    cv2.imwrite('./frame.png', frame[:,:,[2,1,0]])
+    frame = frame[:,:,[2,1,0]]
+    # frame = frame[:,:,[0,1,2]]
+    
     detected_plate_txt, detected_plate_image, detected_chars_image = plate_detection(frame, model_plate_detection, model_character_detection, save_dir='', save=False)
 
     if detected_plate_txt!='':
+        cv2.imwrite('./detected_plate_image.png', detected_plate_image)
+        cv2.imwrite('./detected_chars_image.png', detected_chars_image)
         # Save images to in-memory files to send back as response 
         detected_chars_img_io = io.BytesIO() 
         Image.fromarray(detected_chars_image).save(detected_chars_img_io, 'PNG') 

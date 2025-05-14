@@ -148,10 +148,15 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
 
     model_path = "./my_yolo_11/models/best_pose_detection.pt"
     model = YOLO(model_path)
-    results = model.predict(source=img, conf=0.2, save=False,
+    
+    image = np.ascontiguousarray(img)  # Make sure input is contiguous
+    cv2.imwrite('./image.png', image)
+    results = model.predict(source=image, conf=0.2, save=False,
                             show=False, project=save_dir, name="", save_txt=False)
     for result in results:
-        # annotated_image = result.plot()  # This returns an image with keypoints drawn
+        
+        # Get the annotated image with keypoints and skeletons
+        annotated_image = result.plot()  # This returns an image with keypoints drawn
         # Convert BGR (OpenCV) to RGB (Matplotlib)
         # annotated_image_rgb = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
         keypoints = result.keypoints.xy.cpu().numpy()  # Get keypoints in numpy format
@@ -188,10 +193,10 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
             #     break
         except:
             continue
-        frame_with_plate = np.array(img)
+        frame_with_plate = np.array(annotated_image)
         ########################################### end Rotate image
         
-        
+        cv2.imwrite('./extracted_plate_image.png', extracted_plate_image)
         results2 = model_character_detection.predict(source=extracted_plate_image, conf = 0.3, save=False, show = False, project=save_dir, name="", save_txt = False) 
         
     
