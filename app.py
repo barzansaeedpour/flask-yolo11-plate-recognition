@@ -32,8 +32,8 @@ def predict():
     file = request.files['image']
     image = Image.open(io.BytesIO(file.read()))
     frame = np.array(image)
-    frame = frame[:,:,[2,1,0]]
-    # frame = frame[:,:,[0,1,2]]
+    # frame = frame[:,:,[2,1,0]]
+    frame = frame[:,:,[0,1,2]]
     
     detected_plate_txt, detected_plate_image, detected_chars_image = plate_detection(frame, model_plate_detection, model_character_detection, save_dir='', save=False)
 
