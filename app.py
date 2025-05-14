@@ -13,9 +13,10 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 
 # Load the YOLO11 model (replace this line with the appropriate YOLO11 loading code)
 # model = torch.hub.load('ultralytics/yolov5', 'custom', path='./my_yolo_11/models/plate-detector.pt', force_reload=True).autoshape()  # Change to YOLO11 equivalent
-model = torch.load('./my_yolo_11/models/plate-detector.pt')
+# model = torch.load('./my_yolo_11/models/plate-detector.pt')
 # اگر کش موجود نیست، مدل‌ها را از فایل بارگذاری کنید
-model_plate_detection = YOLO('./my_yolo_11/models/plate-detector.pt')
+# model_plate_detection = YOLO('./my_yolo_11/models/plate-detector.pt')
+model_plate_detection = YOLO('./my_yolo_11/models/best_pose_detection.pt')
 model_character_detection = YOLO('./my_yolo_11/models/character-detector.pt')
 
 @app.route('/')

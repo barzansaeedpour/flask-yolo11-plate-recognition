@@ -64,7 +64,8 @@ numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',]
 # letters = ['alef', 'be', 'che', 'dal', 'ein', 'ghaf', 'h', 'jim', 'lam', 'mim', 'noon', 'sad', 'sin', 'ta', 'te', 'waw', 'ye']
 # letters = ['alef', 'be', 'che', 'ein', 'dal',  'ghaf', 'h', 'jim', 'lam', 'mim', 'noon', 'sad', 'sin', 'ta', 'te', 'waw', 'ye']
 # letters = ['alef', 'be', 'che', 'dal', 'ein', 'jim', 'h', 'ghaf', 'lam', 'sad', 'noon', 'mim', 'sin', 'ta', 'te', 'waw', 'ye']
-letters = ['be', 'dal', 'ein', 'ghaf', 'h', 'jim', 'lam', 'mim', 'noon', 'sad', 'sin', 'ta', 'te', 'waw', 'ye']
+# letters = ['be', 'dal', 'ein', 'ghaf', 'h', 'jim', 'lam', 'mim', 'noon', 'sad', 'sin', 'ta', 'te', 'waw', 'ye']
+letters = ['alef','be','pe','te','se','jim','dal','sin','sad','ta','ein','fe','ghaf','lam','mim','noon','waw','he','ye',]
 
 
 classNames2 = numbers + letters
@@ -73,74 +74,121 @@ classNames2 = numbers + letters
 
 def plate_detection(frame, model_plate_detection, model_character_detection, save_dir,save = True):
     
-    results = model_plate_detection.predict(source=frame, conf = 0.3, save=False, show = False, project=save_dir, name="", save_txt = False) 
-    for r in results:
-        boxes = r.boxes
-    img = Image.fromarray(frame)
-    for box in boxes:
-        # bounding box
-        x1, y1, x2, y2 = box.xyxy[0]
-        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # convert to int values
+    # results = model_plate_detection.predict(source=frame, conf = 0.3, save=False, show = False, project=save_dir, name="", save_txt = False) 
+    # for r in results:
+    #     boxes = r.boxes
+    # img = Image.fromarray(frame)
+    # for box in boxes:
+    #     # bounding box
+    #     x1, y1, x2, y2 = box.xyxy[0]
+    #     x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # convert to int values
 
-        # confidence
-        confidence = math.ceil((box.conf[0]*100))/100
-        # class name
-        cls = int(box.cls[0])
-        # object details
-        org = [x1, y1-20]
-        try:
-            img = Image.fromarray(img)
-        except:
-            pass
-        draw = ImageDraw.Draw(img)
+    #     # confidence
+    #     confidence = math.ceil((box.conf[0]*100))/100
+    #     # class name
+    #     cls = int(box.cls[0])
+    #     # object details
+    #     org = [x1, y1-20]
+    #     try:
+    #         img = Image.fromarray(img)
+    #     except:
+    #         pass
+    #     draw = ImageDraw.Draw(img)
 
-        text = classNames[cls]
+    #     text = classNames[cls]
         
-        if confidence<0.80:
-            color = (0, 0, 255)  # Red color
-        else:
-            color = (255,100,100)
+    #     if confidence<0.80:
+    #         color = (0, 0, 255)  # Red color
+    #     else:
+    #         color = (255,100,100)
         
-        font = ImageFont.truetype(f"{base_dir}/my_yolo_v8/fonts/arial.ttf", 80)    
+    #     font = ImageFont.truetype(f"{base_dir}/my_yolo_v8/fonts/arial.ttf", 80)    
             
-        draw.rectangle([(x1, y1), (x2, y2)], outline =color,width=4)
-        # draw.rectangle([(org[0], org[1]), (org[0]+(len(text)*25), org[1]+25)], fill =color)
-        draw.rectangle([(org[0]-100, org[1]-100), (org[0]+465, org[1]+30)], fill =color,width=1)
-        draw.text((org[0]-100, org[1]-100), f"{persian(text)} -> %{round(confidence*100,2)}", font=font,fill=(255,255,255))
-        img = np.array(img)
+    #     draw.rectangle([(x1, y1), (x2, y2)], outline =color,width=4)
+    #     # draw.rectangle([(org[0], org[1]), (org[0]+(len(text)*25), org[1]+25)], fill =color)
+    #     draw.rectangle([(org[0]-100, org[1]-100), (org[0]+465, org[1]+30)], fill =color,width=1)
+    #     draw.text((org[0]-100, org[1]-100), f"{persian(text)} -> %{round(confidence*100,2)}", font=font,fill=(255,255,255))
+    #     img = np.array(img)
 
-    frame_with_plate = np.array(img)
+    # frame_with_plate = np.array(img)
     
     
-    for r in results:
-            boxes = r.boxes
+    # for r in results:
+    #         boxes = r.boxes
 
-    for box in boxes:
-        # bounding box
-        x1, y1, x2, y2 = box.xyxy[0]
-        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # convert to int values
+    # for box in boxes:
+    #     # bounding box
+    #     x1, y1, x2, y2 = box.xyxy[0]
+    #     x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # convert to int values
+
+    #     try:
+    #         extracted_plate_image = extract_the_plate(img=frame, top_left=(x1, y1), bottom_right=(x2, y2))
+    #     except:
+    #         continue
+    #     new_name = get_new_name()
+        
+    #     ########################################### Start Rotate image
+    #     # (h, w) = extracted_plate_image.shape[:2]
+
+    #     # # Calculate the center of the image
+    #     # center = (w // 2, h // 2)
+
+    #     # # Define the rotation matrix
+    #     # M = cv2.getRotationMatrix2D(center, -15, 1.0)
+
+    #     # # Perform the rotation
+    #     # rotated = cv2.warpAffine(extracted_plate_image, M, (w, h))
+    #     # # Save or display the rotated image
+    #     # cv2.imwrite('textracted_plate_image.jpg', extracted_plate_image)
+    #     # cv2.imwrite('trotated.jpg',rotated)
+    #     # extracted_plate_image = rotated
+    
+    ########################################### Keypoint Prediction
+    img = frame
+
+    model_path = "./my_yolo_11/models/best_pose_detection.pt"
+    model = YOLO(model_path)
+    results = model.predict(source=img, conf=0.2, save=False,
+                            show=False, project=save_dir, name="", save_txt=False)
+    for result in results:
+        # annotated_image = result.plot()  # This returns an image with keypoints drawn
+        # Convert BGR (OpenCV) to RGB (Matplotlib)
+        # annotated_image_rgb = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
+        keypoints = result.keypoints.xy.cpu().numpy()  # Get keypoints in numpy format
 
         try:
-            extracted_plate_image = extract_the_plate(img=frame, top_left=(x1, y1), bottom_right=(x2, y2))
+            # image_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            image_rgb = img
+            pts_src = np.array(keypoints[0], dtype=np.float32)
+            # Compute width and height of the new cropped region
+            width = max(np.linalg.norm(
+                pts_src[0] - pts_src[1]), np.linalg.norm(pts_src[2] - pts_src[3]))
+            height = max(np.linalg.norm(
+                pts_src[0] - pts_src[3]), np.linalg.norm(pts_src[1] - pts_src[2]))
+            width, height = int(width), int(height)
+            # Define the destination points to map the cropped region to a rectangle
+            pts_dst = np.array([
+                [0, 0],
+                [width, 0],
+                [width, height],
+                [0, height]
+            ], dtype=np.float32)
+            # Compute the perspective transformation matrix
+            matrix = cv2.getPerspectiveTransform(pts_src, pts_dst)
+            # Apply the transformation to get the cropped region
+            cropped = cv2.warpPerspective(image_rgb, matrix, (width, height))
+            extracted_plate_image = cropped
+            extracted_plate_image = cv2.resize(
+                extracted_plate_image, (640, 360))
+            # if extracted_plate_image is not None:
+            #     extracted_plate_image = cv2.resize(extracted_plate_image, (640, 360))  # تغییر سایز تصویر تشخیص کاراکتر
+            #     cv2.imshow('detected_plate Image', extracted_plate_image)
+            # # امکان خروج از نمایش با فشردن کلید 'q'
+            # if cv2.waitKey(1) & 0xFF == ord('q'):
+            #     break
         except:
             continue
-        new_name = get_new_name()
-        
-        ########################################### Start Rotate image
-        # (h, w) = extracted_plate_image.shape[:2]
-
-        # # Calculate the center of the image
-        # center = (w // 2, h // 2)
-
-        # # Define the rotation matrix
-        # M = cv2.getRotationMatrix2D(center, -15, 1.0)
-
-        # # Perform the rotation
-        # rotated = cv2.warpAffine(extracted_plate_image, M, (w, h))
-        # # Save or display the rotated image
-        # cv2.imwrite('textracted_plate_image.jpg', extracted_plate_image)
-        # cv2.imwrite('trotated.jpg',rotated)
-        # extracted_plate_image = rotated
+        frame_with_plate = np.array(img)
         ########################################### end Rotate image
         
         
@@ -196,7 +244,7 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
         img = np.array(img)
         
         if save:
-           
+            new_name = get_new_name()
             cv2.imwrite(save_dir + new_name +'-detected.png',img)
         time.sleep(0.1)
         
