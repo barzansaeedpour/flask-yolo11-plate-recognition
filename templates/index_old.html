@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تشخیص پلاک ایرانی</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <form action="{{ url_for('detect_video') }}" method="get">
+            <button type="submit">تشخیص از ویدیو</button>
+          </form>
+        <h1>تشخیص پلاک ایرانی</h1>
+        <form id="upload-form">
+            <label for="image-input">انتخاب تصویر حاوی پلاک:</label>
+            <input type="file" id="image-input" accept="image/*" required>
+            <button type="submit">تشخیص</button>
+        </form>
+        
+        <div id="result">
+            <p>:نتیجه</p>
+            <p id="detected_plate_txt"></p>
+            <div class="result-container">
+                <div class="item">
+                    <p>:نتیجه تشخیص قالب پلاک</p>
+                    <img id="detected_plate_image" src="" alt="">
+                </div>
+                <div class="item">
+                    <p>:نتیجه تشخیص کاراکترها</p>
+                    <img id="detected_chars_image" src="" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/app.js"></script>
+</body>
+</html>

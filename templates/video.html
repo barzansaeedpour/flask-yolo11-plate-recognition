@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fa">
+<head>
+  <meta charset="utf-8">
+  <title>تشخیص از ویدیو</title>
+  <style>
+    body { margin: 0; overflow: hidden; direction: rtl; }
+    #container { display: flex; height: 100vh; }
+    #video-stream { flex: 1; background: #000; }
+    #thumbnails {
+      width: 200px; overflow-y: auto; background: #222; padding: 5px;
+    }
+    #thumbnails img {
+      display: block; width: 100%; margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="video-stream">
+      <img id="live" src="{{ url_for('video_feed') }}"
+           style="width:100%; height:100%; object-fit:cover;">
+    </div>
+    <div id="thumbnails"></div>
+  </div>
+
+  <script>
+    async function updateThumbs() {
+      try {
+        const resp = await fetch('{{ url_for("get_thumbnails") }}');
+        const data = await resp.json();
+        const cont = document.getElementById('thumbnails');
+        cont.innerHTML = '';
+        data.forEach(b64 => {
+          const img = document.createElement('img');
+          img.src = 'data:image/jpeg;base64,' + b64;
+          cont.appendChild(img);
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    setInterval(updateThumbs, 1000);
+    updateThumbs();
+  </script>
+</body>
+</html>

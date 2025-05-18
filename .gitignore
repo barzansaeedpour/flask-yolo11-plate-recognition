@@ -3,3 +3,5 @@
 env/
 **.pth
 **.pt
+*.avi
+*.mp4
