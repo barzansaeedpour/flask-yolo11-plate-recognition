@@ -206,8 +206,8 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
             
             detected_classes = [classNames2[i] for i in detected_classes]
             continue_flag, detected_classes = check_detected_classes_validation(detected_classes, numbers, letters, save_dir, boxes)
-        # if continue_flag:
-        #     continue    
+        if continue_flag:
+            continue    
         img = Image.fromarray(extracted_plate_image)
         for box in boxes:
             # bounding box

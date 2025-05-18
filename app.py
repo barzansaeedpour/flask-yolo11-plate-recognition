@@ -4,6 +4,8 @@ import base64
 from flask import Flask, render_template, Response, jsonify, request, redirect, url_for, flash
 import cv2
 from werkzeug.utils import secure_filename
+from my_yolo_11.yolov11 import plate_detection
+from ultralytics import YOLO
 
 app = Flask(__name__)
 app.secret_key = "change_this_to_a_random_secret"  # required for flash()
@@ -17,7 +19,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 video_source = None
 thumbnails = []
 thumb_lock = threading.Lock()
-MAX_THUMBS = 80
+MAX_THUMBS = 20
+
+model_plate_detection = YOLO("./my_yolo_11/models/best_pose_detection.pt")
+model_character_detection = YOLO("./my_yolo_11/models/character-detector.pt")
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -33,31 +38,33 @@ def gen_frames():
         success, frame = cap.read()
         if not success:
             break
+        
+        detected_plate_txt, detected_chars_image, detected_plate_image = plate_detection(frame, model_plate_detection, model_character_detection, save_dir='', save=False)
 
-        # Simple processing: Grayscale conversion
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        processed = gray
-
-        # encode original frame for streaming
-        ret, buffer = cv2.imencode('.jpg', frame)
-        frame_jpeg = buffer.tobytes()
-
+        if len(detected_plate_txt) >= 8:
+            processed = detected_plate_image
+        else:
+            processed = frame
+            
         # encode processed thumbnail (grayscale)
         ret2, buffer2 = cv2.imencode('.jpg', processed)
         b64 = base64.b64encode(buffer2).decode('utf-8')
-
+        
         # store thumbnail
         with thumb_lock:
             thumbnails.append(b64)
             if len(thumbnails) > MAX_THUMBS:
                 thumbnails.pop(0)
+                
+        # encode original frame for streaming
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame_jpeg = buffer.tobytes()
 
         # yield MJPEG chunk
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_jpeg + b'\r\n')
+            b'Content-Type: image/jpeg\r\n\r\n' + frame_jpeg + b'\r\n')
 
     cap.release()
-
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
