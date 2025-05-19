@@ -56,7 +56,9 @@ def gen_frames(camera=False):
         if len(detected_plate_txt) >= 8:
             processed = detected_plate_image
         else:
-            processed = frame
+            # processed = frame
+            detected_plate_txt = ''
+            processed = np.zeros((frame.shape[0], frame.shape[1], 3), dtype=np.uint8)
             
         # encode processed thumbnail (grayscale)
         ret2, buffer2 = cv2.imencode('.jpg', processed)
@@ -64,7 +66,7 @@ def gen_frames(camera=False):
         
         # store thumbnail
         with thumb_lock:
-            thumbnails.append(b64)
+            thumbnails.append([b64, detected_plate_txt])
             if len(thumbnails) > MAX_THUMBS:
                 thumbnails.pop(0)
                 

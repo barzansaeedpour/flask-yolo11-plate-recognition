@@ -56,6 +56,15 @@
       transition: transform 0.2s, box-shadow 0.2s;
       cursor: pointer;
     }
+    #thumbnails span {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
 
     #thumbnails img:hover {
       transform: scale(1.03);
@@ -94,10 +103,15 @@
         const data = await resp.json();
         const cont = document.getElementById('thumbnails');
         cont.innerHTML = '';
-        data.forEach(b64 => {
+        data.forEach(arr => {
+          b64 = arr[0];
+          plate_text = arr[1];
           const img = document.createElement('img');
+          const span = document.createElement('span');
+          span.innerText = '16dal37165' + plate_text;
           img.src = 'data:image/jpeg;base64,' + b64;
           cont.appendChild(img);
+          cont.appendChild(span);
         });
       } catch (e) {
         console.error("Thumbnail update failed:", e);
