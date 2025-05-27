@@ -9,6 +9,7 @@ from ultralytics import YOLO
 from PIL import Image
 import io
 import numpy as np
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "change_this_to_a_random_secret"  # required for flash()
@@ -26,17 +27,87 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 video_source = None
 thumbnails = []
 thumb_lock = threading.Lock()
-MAX_THUMBS = 20
+MAX_THUMBS = 2000
 
 model_plate_detection = YOLO("./my_yolo_11/models/best_pose_detection.pt")
 model_character_detection = YOLO("./my_yolo_11/models/character-detector.pt")
 
+the_last_image = []
+the_last_plate_text = ''
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+def get_new_name():
+    # Get the current date and time
+    current_datetime = datetime.now()
+
+    # Format the datetime as desired (e.g., YYYYMMDD-HHMMSS)
+    formatted_datetime = current_datetime.strftime("%Y%m%d-%H%M%S")
+
+    # Create a unique filename
+    filename = f"my_file_{formatted_datetime}"
+    # print(f"Unique filename: {filename}")
+    return filename
+
+def save_frame(frame, frame_count, current_frame_number, fps=None):
+    """Save the current frame as an image file."""
+    if frame_count <= 0 or current_frame_number <= 0:
+        return
+    save_dir = f"{UPLOAD_FOLDER.replace('\\','/')}/frames"
+    # Create directory if it doesn't exist
+    os.makedirs(save_dir, exist_ok=True)
+    # Save the frame as an image file
+    filename = f"frame_{current_frame_number:04d}.jpg"
+    filepath = f"{save_dir}/{filename}"
+    
+    cv2.imwrite(filepath, frame)
+    print(f"Saved frame {current_frame_number} to {filepath}")
+    if frame_count==current_frame_number:
+        
+
+        # Parameters
+        frames_dir = save_dir          # Directory with your image frames
+        output_path = f"{UPLOAD_FOLDER}/{get_new_name()}.mp4"
+        if not fps:
+            fps = 30  # Frames per second                       # Frames per second
+        image_extension = '.jpg'        # or '.png', depending on your files
+
+        # Get sorted list of frame filenames
+        frame_files = sorted([
+            f for f in os.listdir(frames_dir) if f.endswith(image_extension)
+        ])
+
+        # Read the first frame to get frame size
+        first_frame = cv2.imread(os.path.join(frames_dir, frame_files[0]))
+        height, width, _ = first_frame.shape
+        size = (width, height)
+
+        # Define the video writer
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # use 'XVID' for .avi
+        out = cv2.VideoWriter(output_path, fourcc, fps, size)
+
+        # Write frames to video
+        for filename in frame_files:
+            frame_path = os.path.join(frames_dir, filename)
+            frame = cv2.imread(frame_path)
+            if frame is None:
+                print(f"Skipping {filename}, couldn't read.")
+                continue
+            out.write(frame)
+
+        out.release()
+        print("Video saved as:", output_path)
+
+
+        
 def gen_frames(camera=False):
     """Read from the selected video_source and yield MJPEG frames."""
     global video_source
+    global the_last_image
+    global the_last_plate_text
+    global frame_counter
     if video_source is None:
         return
 
@@ -45,21 +116,40 @@ def gen_frames(camera=False):
         cap = cv2.VideoCapture(0)
     else:
         cap = cv2.VideoCapture(video_source)
-            
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        print("FPS:", fps)
+        print("Total number of frames:", frame_count)
+        
+    
+    current_frame_number = 0
     while cap.isOpened():
         success, frame = cap.read()
         if not success:
             break
         
-        detected_plate_txt, detected_chars_image, detected_plate_image = plate_detection(frame, model_plate_detection, model_character_detection, save_dir='', save=False)
+        current_frame_number += 1
+        print(f"Processing frame {current_frame_number}/{frame_count}")
+        detected_plate_txt, frame_with_plate, detected_plate_image = plate_detection(frame, model_plate_detection, model_character_detection, save_dir='', save=False)
 
         if len(detected_plate_txt) >= 8:
             processed = detected_plate_image
+            frame = frame_with_plate
+            
+            the_last_image = detected_plate_image
+            the_last_plate_text = detected_plate_txt
         else:
             # processed = frame
             detected_plate_txt = ''
-            processed = np.zeros((frame.shape[0], frame.shape[1], 3), dtype=np.uint8)
-            
+            if len(the_last_image)==0:
+                processed = np.zeros((frame.shape[0], frame.shape[1], 3), dtype=np.uint8)
+                the_last_plate_text = ''
+            else:
+                processed = the_last_image
+                detected_plate_txt = the_last_plate_text
+        
+        # if not camera: 
+        #     save_frame(frame, frame_count, current_frame_number, fps)   
         # encode processed thumbnail (grayscale)
         ret2, buffer2 = cv2.imencode('.jpg', processed)
         b64 = base64.b64encode(buffer2).decode('utf-8')
@@ -119,6 +209,10 @@ def detect_video():
     if video_source is None:
         flash('اول باید یک ویدیو آپلود کنید')
         return redirect(url_for('index'))
+    global the_last_image
+    the_last_image = []
+    global the_last_plate_text
+    the_last_plate_text = ''
     return render_template('video.html', context={"camera":False})
 
 @app.route('/upload_image')
@@ -182,6 +276,94 @@ def get_thumbnails():
     with thumb_lock:
         data = list(reversed(thumbnails))
     return jsonify(data)
+
+########################################### Upload Video, Download Result
+from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request, jsonify, send_file, url_for
+
+import uuid
+UPLOAD_FOLDER = 'uploads'
+RESULT_FOLDER = 'results'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(RESULT_FOLDER, exist_ok=True)
+
+
+from flask import Flask, render_template, request, jsonify, send_file, url_for
+from werkzeug.utils import secure_filename
+import os, uuid, threading, cv2
+
+processing_progress = {}  # Dictionary to track progress by file_id
+
+@app.route('/upload-video-progress', methods=['GET', 'POST'])
+def upload_video_progress():
+    if request.method == 'GET':
+        return render_template('upload_process_video.html')
+
+    if request.method == 'POST':
+        video = request.files['video']
+        filename = secure_filename(video.filename)
+        file_id = str(uuid.uuid4())
+        saved_path = os.path.join(UPLOAD_FOLDER, f"{file_id}_{filename}")
+        result_path = os.path.join(RESULT_FOLDER, f"{file_id}_result.mp4")
+
+        video.save(saved_path)
+        processing_progress[file_id] = 0
+
+        # Start processing in a background thread
+        threading.Thread(target=process_video, args=(saved_path, result_path, file_id)).start()
+
+        return jsonify({'file_id': file_id})
+
+@app.route('/progress/<file_id>')
+def check_progress(file_id):
+    progress = processing_progress.get(file_id, 0)
+    return jsonify({'progress': progress})
+
+
+@app.route('/download/<filename>')
+def download_processed_video(filename):
+    return send_file(os.path.join(RESULT_FOLDER, filename), as_attachment=True)
+
+import cv2
+
+
+def frame_process(frame):
+    detected_plate_txt, frame_with_plate, detected_plate_image = plate_detection(frame, model_plate_detection, model_character_detection, save_dir='', save=False)
+
+    if len(detected_plate_txt) >= 8:
+        return frame_with_plate
+    else:
+        return frame
+    
+def process_video(input_path, output_path, file_id):
+    cap = cv2.VideoCapture(input_path)
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height), isColor=True)
+
+    count = 0
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        frame = frame_process(frame)
+        if frame is not None:
+            out.write(frame)
+
+        count += 1
+        processing_progress[file_id] = int((count / total_frames) * 100)
+
+    cap.release()
+    out.release()
+
+    processing_progress[file_id] = 100  # Done
+
+
 
 ############################# Login Route #############################
 from flask import Flask, render_template, request, redirect, url_for, session, flash
