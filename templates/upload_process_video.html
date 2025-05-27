@@ -1,47 +1,66 @@
-<!-- templates/upload_process_video.html -->
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <title>پردازش ویدیو</title>
+  <title>آپلود و پردازش ویدیو</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
   <style>
     body {
-      background: #f8f9fa;
+      background-color: #f2f4f7;
       font-family: 'Tahoma', sans-serif;
-      padding: 40px;
+      padding: 2rem;
+    }
+    .card {
+      border-radius: 1rem;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
     }
     .progress {
       height: 30px;
+      margin-top: 1rem;
     }
     .progress-bar {
       font-size: 1rem;
+      font-weight: bold;
     }
+    .btn {
+      font-size: 1rem;
+    }
+    .form-label {
+      font-weight: bold;
+    }
+    
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h1 class="mb-4">آپلود و پردازش ویدیو</h1>
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="card p-4 bg-white">
+          <h3 class="mb-4 text-center text-primary">آپلود و پردازش ویدیو</h3>
 
-    <form id="uploadForm" enctype="multipart/form-data">
-      <div class="mb-3">
-        <label for="videoFile" class="form-label">انتخاب فایل ویدیو:</label>
-        <input class="form-control" type="file" id="videoFile" name="video" required>
+          <form id="uploadForm" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="videoFile" class="form-label">انتخاب فایل ویدیو:</label>
+              <input class="form-control" type="file" id="videoFile" name="video" accept="video/*" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">آپلود و پردازش</button>
+          </form>
+
+          <div id="progressSection" class="mt-4" style="display:none;">
+            <label class="form-label">در حال پردازش...</label>
+            <div class="progress">
+              <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                   role="progressbar" style="width: 0%;">0%</div>
+            </div>
+          </div>
+
+          <div id="downloadSection" class="mt-4 text-center" style="display:none;">
+            <a id="downloadLink" class="btn btn-success" href="#" download>دانلود ویدیو پردازش‌شده</a>
+          </div>
+        </div>
       </div>
-      <button type="submit" class="btn btn-primary">آپلود و پردازش</button>
-    </form>
-
-    <div class="mt-4" id="progressSection" style="display:none;">
-      <label>در حال پردازش...</label>
-      <div class="progress">
-        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
-             role="progressbar" style="width: 0%;">0%</div>
-      </div>
-    </div>
-
-    <div class="mt-4" id="downloadSection" style="display:none;">
-      <a id="downloadLink" class="btn btn-success" href="#" download>دانلود ویدیو پردازش‌شده</a>
     </div>
   </div>
 
@@ -73,30 +92,28 @@
 
       xhr.onload = function () {
         if (xhr.status === 200) {
-            const response = JSON.parse(xhr.responseText);
-            const fileId = response.file_id;
+          const response = JSON.parse(xhr.responseText);
+          const fileId = response.file_id;
 
-            // Poll processing progress
-            const intervalId = setInterval(() => {
+          const intervalId = setInterval(() => {
             fetch(`/progress/${fileId}`)
-                .then(res => res.json())
-                .then(data => {
+              .then(res => res.json())
+              .then(data => {
                 const percent = data.progress;
                 progressBar.style.width = percent + '%';
                 progressBar.innerText = percent + '%';
 
                 if (percent >= 100) {
-                    clearInterval(intervalId);
-                    downloadLink.href = `/download/${fileId}_result.mp4`;
-                    downloadSection.style.display = 'block';
+                  clearInterval(intervalId);
+                  downloadLink.href = `/download/${fileId}_result.mp4`;
+                  downloadSection.style.display = 'block';
                 }
-                });
-            }, 1500); // Poll every 1.5s
+              });
+          }, 1500);
         } else {
-            alert('خطا در آپلود یا پردازش ویدیو');
+          alert('خطا در آپلود یا پردازش ویدیو');
         }
-        };
-
+      };
 
       xhr.send(formData);
     });

@@ -2,93 +2,15 @@
 <html lang="fa">
 <head>
   <meta charset="utf-8">
-  <title>ورود</title>
+  <title>ورود | چاویر</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');
 
-    body {
-      font-family: 'Vazirmatn', sans-serif;
-      direction: rtl;
-      background: #f8f9fa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-    }
-
-    .login-box {
-      background: #fff;
-      padding: 40px 30px;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
-    }
-
-    .login-box h2 {
-      margin-bottom: 8px;
-      color: #333;
-      font-weight: 700;
-    }
-
-    .login-box h1 {
-      font-size: 20px;
-      color: #555;
-      margin-bottom: 30px;
-    }
-
-    input[type="text"], input[type="password"] {
-      width: 92%;
-      padding: 12px 14px;
-      margin: 10px 0px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: border-color 0.2s;
-    }
-
-    input:focus {
-      border-color: #007bff;
-      outline: none;
-    }
-
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 12px;
-      width: 100%;
-      border-radius: 8px;
-      font-size: 15px;
-      margin-top: 15px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .messages {
-      color: red;
-      font-size: 13px;
-      margin-bottom: 10px;
-    }
-
-    ul {
-      padding: 0;
-      list-style: none;
-      margin: 0;
-    }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
   <div class="login-box">
-    <h2>تست سامانه تشخیص پلاک</h2>
-    <h1>ورود</h1>
+    <h2>چاوێر</h2>
+    <h3>سامانه تشخیص پلاک</h3>
 
     {% with messages = get_flashed_messages() %}
       {% if messages %}
