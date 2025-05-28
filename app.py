@@ -229,8 +229,9 @@ def predict():
     image = Image.open(io.BytesIO(file.read()))
     frame = np.array(image)
     # frame = frame[:,:,[2,1,0]]
-    frame = frame[:,:,[0,1,2]]
-    
+    # frame = frame[:,:,[0,1,2]]
+    # frame = cv2.resize(frame, (2592, 1944))  # Resize to match model input size
+    # cv2.imwrite('./frameframe.png', frame)
     detected_plate_txt, detected_plate_image, detected_chars_image = plate_detection(frame, model_plate_detection, model_character_detection, save_dir='', save=False)
 
     if detected_plate_txt!='':

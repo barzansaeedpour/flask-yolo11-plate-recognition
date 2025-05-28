@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تشخیص پلاک ایرانی</title>
-    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
     <style>
         @font-face {
             font-family: 'MyCustomFont';
@@ -21,12 +21,10 @@
             color: #333;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             direction: rtl;
+            min-height: 100vh;
         }
+
 
         .container {
             text-align: center;
@@ -34,10 +32,12 @@
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            width: 80%; /* Increased width */
-            max-width: 1000px; /* Adjusted for better spacing */
+            width: 80%;
+            max-width: 1000px;
+            margin: 40px auto; /* ⬅️ Center the container */
             animation: fadeIn 0.6s ease-in-out;
         }
+
 
         h1 {
             margin-bottom: 15px;
@@ -149,6 +149,7 @@
     </style>
 </head>
 <body>
+    {% include 'navbar.html' %}
     <div class="container">
         <h1>تشخیص پلاک ایرانی</h1>
         <form id="upload-form">

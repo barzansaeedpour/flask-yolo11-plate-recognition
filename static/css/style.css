@@ -5,6 +5,7 @@
     font-weight: normal;
     font-style: normal;
   }
+
   body {
     font-family: 'Samim', sans-serif;
     direction: rtl;
@@ -16,10 +17,9 @@
     margin: 0;
     flex-direction: column;
     justify-content: space-evenly;
-    padding: 20px;
+    padding: 0px;
   }
   
-
   .login-box {
     background: white;
     padding: 40px 30px;
@@ -125,11 +125,6 @@
 /* ////////////////////////////// */
 
 
-
-
-
-
-
   .btn-dashboard {
     display: flex;
     flex-direction: column;
@@ -191,3 +186,5 @@
       font-size: 22px;
     }
   }
+
+  

@@ -151,7 +151,7 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
     
     image = np.ascontiguousarray(img)  # Make sure input is contiguous
     cv2.imwrite('./image.png', image)
-    results = model.predict(source=image, conf=0.2, save=False,
+    results = model.predict(source=image, conf=0.1, save=False,
                             show=False, project=save_dir, name="", save_txt=False)
     for result in results:
         
