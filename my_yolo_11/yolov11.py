@@ -58,6 +58,52 @@ base_dir = os.getenv("base_dir_plate_detection")
 # plate_detection_path = f'{base_dir}/my_yolo_v8/outputs2/plate_detection_path/'
 # character_detection_path = f'{base_dir}/my_yolo_v8/outputs2/character_detection_path/'
 
+import cv2
+import numpy as np
+
+def add_filled_rectangle(image, position, text, color=(255, 255, 255), alpha=0.9, padding=10):
+    x, y = map(int, position)
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 2
+    thickness = 2
+
+    # Calculate text size
+    (text_width, text_height), _ = cv2.getTextSize(text, font, font_scale, thickness)
+    box_width = text_width + 2 * padding
+    box_height = text_height + 2 * padding
+
+    # Define rectangle corners
+    top_left = (x, y - box_height - 10)
+    bottom_right = (x + box_width, y - 10)
+
+    # Create overlay for transparency
+    overlay = image.copy()
+    cv2.rectangle(overlay, top_left, bottom_right, color, thickness=-1)
+
+    # Blend with transparency
+    cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0, image)
+
+    return image, top_left, text_height, padding
+
+
+def add_text_to_image(image, text, position):
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 2
+    color = (0, 0, 0)
+    thickness = 2
+
+    # Add transparent white rectangle first
+    image, top_left, text_height, padding = add_filled_rectangle(image, position, text)
+
+    # Draw text centered vertically inside the rectangle
+    text_x = top_left[0] + padding
+    text_y = top_left[1] + text_height + padding - 2
+
+    cv2.putText(image, text, (text_x, text_y), font, font_scale, color, thickness, lineType=cv2.LINE_AA)
+    return image
+
+
+
 classNames = ['plate']
 # classNames2 = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'be', 'dal', 'ein', 'ghaf', 'h', 'jim', 'lam', 'mim', 'noon', 'sad', 'sin', 'ta', 'te', 'waw', 'ye']
 numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',]
@@ -74,74 +120,6 @@ classNames2 = numbers + letters
 
 def plate_detection(frame, model_plate_detection, model_character_detection, save_dir,save = True):
     
-    # results = model_plate_detection.predict(source=frame, conf = 0.3, save=False, show = False, project=save_dir, name="", save_txt = False) 
-    # for r in results:
-    #     boxes = r.boxes
-    # img = Image.fromarray(frame)
-    # for box in boxes:
-    #     # bounding box
-    #     x1, y1, x2, y2 = box.xyxy[0]
-    #     x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # convert to int values
-
-    #     # confidence
-    #     confidence = math.ceil((box.conf[0]*100))/100
-    #     # class name
-    #     cls = int(box.cls[0])
-    #     # object details
-    #     org = [x1, y1-20]
-    #     try:
-    #         img = Image.fromarray(img)
-    #     except:
-    #         pass
-    #     draw = ImageDraw.Draw(img)
-
-    #     text = classNames[cls]
-        
-    #     if confidence<0.80:
-    #         color = (0, 0, 255)  # Red color
-    #     else:
-    #         color = (255,100,100)
-        
-    #     font = ImageFont.truetype(f"{base_dir}/my_yolo_v8/fonts/arial.ttf", 80)    
-            
-    #     draw.rectangle([(x1, y1), (x2, y2)], outline =color,width=4)
-    #     # draw.rectangle([(org[0], org[1]), (org[0]+(len(text)*25), org[1]+25)], fill =color)
-    #     draw.rectangle([(org[0]-100, org[1]-100), (org[0]+465, org[1]+30)], fill =color,width=1)
-    #     draw.text((org[0]-100, org[1]-100), f"{persian(text)} -> %{round(confidence*100,2)}", font=font,fill=(255,255,255))
-    #     img = np.array(img)
-
-    # frame_with_plate = np.array(img)
-    
-    
-    # for r in results:
-    #         boxes = r.boxes
-
-    # for box in boxes:
-    #     # bounding box
-    #     x1, y1, x2, y2 = box.xyxy[0]
-    #     x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # convert to int values
-
-    #     try:
-    #         extracted_plate_image = extract_the_plate(img=frame, top_left=(x1, y1), bottom_right=(x2, y2))
-    #     except:
-    #         continue
-    #     new_name = get_new_name()
-        
-    #     ########################################### Start Rotate image
-    #     # (h, w) = extracted_plate_image.shape[:2]
-
-    #     # # Calculate the center of the image
-    #     # center = (w // 2, h // 2)
-
-    #     # # Define the rotation matrix
-    #     # M = cv2.getRotationMatrix2D(center, -15, 1.0)
-
-    #     # # Perform the rotation
-    #     # rotated = cv2.warpAffine(extracted_plate_image, M, (w, h))
-    #     # # Save or display the rotated image
-    #     # cv2.imwrite('textracted_plate_image.jpg', extracted_plate_image)
-    #     # cv2.imwrite('trotated.jpg',rotated)
-    #     # extracted_plate_image = rotated
     
     ########################################### Keypoint Prediction
     img = frame
@@ -153,18 +131,40 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
     cv2.imwrite('./image.png', image)
     results = model.predict(source=image, conf=0.1, save=False,
                             show=False, project=save_dir, name="", save_txt=False)
+    
+    list_of_detected_plate_positions = []
     for result in results:
         
-        # Get the annotated image with keypoints and skeletons
-        annotated_image = result.plot()  # This returns an image with keypoints drawn
+        # # Get the annotated image with keypoints and skeletons
+        # annotated_image = result.plot()  # This returns an image with keypoints drawn
+        # annotated_image = frame
+        
+        annotated_image = result.orig_img.copy()
+
+        boxes = result.boxes.xyxy.cpu().numpy()      # shape: [N, 4]
+        keypoints = result.keypoints.xy.cpu().numpy()  # shape: [N, K, 2]
+
+        for i in range(len(boxes)):
+            x1, y1, x2, y2 = map(int, boxes[i])
+            cv2.rectangle(annotated_image, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
+
+            # Draw keypoints
+            for (x, y) in keypoints[i]:
+                if x > 0 and y > 0:  # skip invisible points
+                    cv2.circle(annotated_image, (int(x), int(y)), radius=4, color=(0, 0, 255), thickness=-1)
+
+        
+        
         # Convert BGR (OpenCV) to RGB (Matplotlib)
         # annotated_image_rgb = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
         keypoints = result.keypoints.xy.cpu().numpy()  # Get keypoints in numpy format
 
         try:
             # image_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            image_rgb = img
+            image_rgb = img 
             pts_src = np.array(keypoints[0], dtype=np.float32)
+            if pts_src is not None:
+                list_of_detected_plate_positions.append(pts_src[0])
             # Compute width and height of the new cropped region
             width = max(np.linalg.norm(
                 pts_src[0] - pts_src[1]), np.linalg.norm(pts_src[2] - pts_src[3]))
@@ -194,6 +194,9 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
         except:
             continue
         frame_with_plate = np.array(annotated_image)
+        
+            
+        
         ########################################### end Rotate image
         
         cv2.imwrite('./extracted_plate_image.png', extracted_plate_image)
@@ -252,7 +255,7 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
             new_name = get_new_name()
             cv2.imwrite(save_dir + new_name +'-detected.png',img)
         time.sleep(0.1)
-        
+        frame_with_plate = add_text_to_image(frame_with_plate, detected_classes, list_of_detected_plate_positions[0])
         return detected_classes, frame_with_plate, img
         # cv2.imshow("Real-time Webcam", img)
         # time.sleep(0.1)
