@@ -90,7 +90,7 @@
       {% if context["camera"] %}
       <img id="live" src="{{ url_for('camera_feed') }}">
       {% else %}
-      <img id="live" src="{{ url_for('video_feed') }}">
+      <img id="live" src="{{ url_for('video_feed') }}" style="max-width: 100%; height: auto; display: block;">
       {% endif%}
     </div>
     <div id="thumbnails"></div>

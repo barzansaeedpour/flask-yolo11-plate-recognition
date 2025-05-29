@@ -107,6 +107,29 @@ def add_text_to_image(image, text, position):
     return image
 
 
+def overlay_image_top_left(base_img, overlay_img):
+    """
+    Overlays `overlay_img` on the top-left corner of `base_img` without resizing.
+    
+    Parameters:
+        base_img (np.ndarray): The background image.
+        overlay_img (np.ndarray): The image to overlay.
+
+    Returns:
+        np.ndarray: Combined image with overlay on top-left.
+    """
+    h, w = overlay_img.shape[:2]
+
+    # Check if overlay_img fits into base_img
+    if h > base_img.shape[0] or w > base_img.shape[1]:
+        raise ValueError("Overlay image does not fit within base image dimensions.")
+
+    # Overlay the image at top-left
+    base_img[0:h, 0:w] = overlay_img
+
+    return base_img
+
+
 
 classNames = ['plate']
 # classNames2 = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'be', 'dal', 'ein', 'ghaf', 'h', 'jim', 'lam', 'mim', 'noon', 'sad', 'sin', 'ta', 'te', 'waw', 'ye']
@@ -260,6 +283,7 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
             cv2.imwrite(save_dir + new_name +'-detected.png',img)
         time.sleep(0.1)
         frame_with_plate = add_text_to_image(frame_with_plate, detected_classes, list_of_detected_plate_positions[0])
+        frame_with_plate = overlay_image_top_left(frame_with_plate, img)
         return detected_classes, frame_with_plate, img
         # cv2.imshow("Real-time Webcam", img)
         # time.sleep(0.1)
