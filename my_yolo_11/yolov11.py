@@ -61,10 +61,10 @@ base_dir = os.getenv("base_dir_plate_detection")
 import cv2
 import numpy as np
 
-def add_filled_rectangle(image, position, text, color=(255, 255, 255), alpha=0.9, padding=10):
+def add_filled_rectangle(image, position, text, color=(0, 190, 0), alpha=0.9, padding=10):
     x, y = map(int, position)
     font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = 2
+    font_scale = 1.5
     thickness = 2
 
     # Calculate text size
@@ -88,17 +88,21 @@ def add_filled_rectangle(image, position, text, color=(255, 255, 255), alpha=0.9
 
 def add_text_to_image(image, text, position):
     font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = 2
-    color = (0, 0, 0)
+    font_scale = 1.5
+    color = (255, 255, 255)
     thickness = 2
 
+    try:
+        text = text[:2] +" "+ text[2:-5]+" "+ text[-5:-2]+" " + text[-2:] 
+    except:
+        text = text
+        
     # Add transparent white rectangle first
     image, top_left, text_height, padding = add_filled_rectangle(image, position, text)
 
     # Draw text centered vertically inside the rectangle
     text_x = top_left[0] + padding
     text_y = top_left[1] + text_height + padding - 2
-
     cv2.putText(image, text, (text_x, text_y), font, font_scale, color, thickness, lineType=cv2.LINE_AA)
     return image
 
@@ -148,10 +152,10 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
             x1, y1, x2, y2 = map(int, boxes[i])
             cv2.rectangle(annotated_image, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
 
-            # Draw keypoints
-            for (x, y) in keypoints[i]:
-                if x > 0 and y > 0:  # skip invisible points
-                    cv2.circle(annotated_image, (int(x), int(y)), radius=4, color=(0, 0, 255), thickness=-1)
+            # # Draw keypoints
+            # for (x, y) in keypoints[i]:
+            #     if x > 0 and y > 0:  # skip invisible points
+            #         cv2.circle(annotated_image, (int(x), int(y)), radius=4, color=(0, 0, 255), thickness=-1)
 
         
         
