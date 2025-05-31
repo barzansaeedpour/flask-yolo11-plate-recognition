@@ -73,8 +73,8 @@ def add_filled_rectangle(image, position, text, color=(0, 190, 0), alpha=0.9, pa
     box_height = text_height + 2 * padding
 
     # Define rectangle corners
-    top_left = (x, y - box_height - 10)
-    bottom_right = (x + box_width, y - 10)
+    top_left = (x, y - box_height - 50)
+    bottom_right = (x + box_width, y - 50)
 
     # Create overlay for transparency
     overlay = image.copy()
@@ -264,16 +264,18 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
             text = classNames2[cls]
             
             if confidence<0.80:
-                color = (0, 0, 255)  # Red color
+                # color = (0, 0, 255)  # Red color
+                color = (255, 0, 0)  # Red color
             else:
-                color = (255,100,100)
+                # color = (255,100,100)
+                color = (13, 117, 34)
             
             font = ImageFont.truetype(f"{base_dir}/my_yolo_v8/fonts/arial.ttf", 12)    
             
             draw.rectangle([(x1, y1), (x2, y2)], outline =color,)
             # draw.rectangle([(org[0], org[1]), (org[0]+(len(text)*25), org[1]+25)], fill =color)
             draw.rectangle([(org[0], org[1]), (org[0]+65, org[1]+25)], fill =color)
-            draw.text(org, f"{persian(text)} -> %{round(confidence*100,2)}", font=font,fill=(255,255,255))
+            draw.text((org[0]+5, org[1]+5), f"{persian(text)} -> %{round(confidence*100,2)}", font=font,fill=(255,255,255))
             img = np.array(img)
 
         img = np.array(img)
@@ -283,7 +285,7 @@ def plate_detection(frame, model_plate_detection, model_character_detection, sav
             cv2.imwrite(save_dir + new_name +'-detected.png',img)
         time.sleep(0.1)
         frame_with_plate = add_text_to_image(frame_with_plate, detected_classes, list_of_detected_plate_positions[0])
-        frame_with_plate = overlay_image_top_left(frame_with_plate, img)
+        # frame_with_plate = overlay_image_top_left(frame_with_plate, img)
         return detected_classes, frame_with_plate, img
         # cv2.imshow("Real-time Webcam", img)
         # time.sleep(0.1)
